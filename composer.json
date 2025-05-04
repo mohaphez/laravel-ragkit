@@ -1,0 +1,49 @@
+{
+    "name": "ragkit/ragkit",
+    "description": "A Laravel package for Retrieval-Augmented Generation (RAG) systems with support for multiple drivers",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hessam Taghvei",
+            "email": "hi@hesam.dev"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0",
+        "illuminate/http": "^8.0|^9.0|^10.0|^11.0|^12.0",
+        "illuminate/contracts": "^8.0|^9.0|^10.0|^11.0|^12.0",
+        "illuminate/database": "^8.0|^9.0|^10.0|^11.0|^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+        "phpunit/phpunit": "^9.0|^10.0|^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "RagKit\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RagKit\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "RagKit\\RagKitServiceProvider"
+            ],
+            "aliases": {
+                "RagKit": "RagKit\\Facades\\RagKit"
+            }
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
