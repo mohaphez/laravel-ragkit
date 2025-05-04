@@ -1,6 +1,24 @@
 # RagKit - Retrieval-Augmented Generation for Laravel
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/ragkit/ragkit.svg?style=flat-square)](https://packagist.org/packages/ragkit/ragkit)
+[![Total Downloads](https://img.shields.io/packagist/dt/ragkit/ragkit.svg?style=flat-square)](https://packagist.org/packages/ragkit/ragkit)
+[![Tests](https://img.shields.io/github/actions/workflow/status/ragkit/ragkit/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/ragkit/ragkit/actions/workflows/run-tests.yml)
+[![License](https://img.shields.io/packagist/l/ragkit/ragkit.svg?style=flat-square)](https://packagist.org/packages/ragkit/ragkit)
+
 RagKit is a Laravel package that provides a clean, reusable implementation of Retrieval-Augmented Generation (RAG) systems with support for multiple drivers.
+
+## 📚 Documentation
+
+For detailed documentation, please see [DOCUMENTATION.md](DOCUMENTATION.md).
+
+### Quick Links
+- [Features](#features)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Basic Usage](#usage)
+- [Console Commands](#console-commands)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
