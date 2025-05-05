@@ -13,9 +13,22 @@ use RagKit\Drivers\ChatBees\ChatBeesAdapter;
 use RagKit\RAG\RagService;
 use RagKit\Services\DocumentService;
 use RagKit\Services\ChatService;
+use RagKit\Events\DocumentUploaded;
+use RagKit\Listeners\HandleDocumentUpload;
 
 class RagKitServiceProvider extends ServiceProvider
 {
+    /**
+     * The event handler mappings for the application.
+     *
+     * @var array
+     */
+    protected $listen = [
+        DocumentUploaded::class => [
+            HandleDocumentUpload::class,
+        ],
+    ];
+
     /**
      * Register any application services.
      */
@@ -86,6 +99,13 @@ class RagKitServiceProvider extends ServiceProvider
                 RagListCollections::class,
             ]);
         }
+
+        // Register event listeners
+        foreach ($this->listen as $event => $listeners) {
+            foreach ($listeners as $listener) {
+                $this->app['events']->listen($event, $listener);
+            }
+        }
     }
     
     /**
@@ -102,8 +122,6 @@ class RagKitServiceProvider extends ServiceProvider
                 );
                 $service->registerAdapter('chatbees', $adapter);
                 break;
-                
-            // Additional drivers can be added here
         }
     }
 } 
