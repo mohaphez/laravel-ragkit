@@ -3,7 +3,7 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/mohaphez/laravel-ragkit.svg?style=flat-square)](https://packagist.org/packages/mohaphez/laravel-ragkit)
 [![Total Downloads](https://img.shields.io/packagist/dt/mohaphez/laravel-ragkit.svg?style=flat-square)](https://packagist.org/packages/mohaphez/laravel-ragkit)
 [![Tests](https://img.shields.io/github/actions/workflow/status/mohaphez/laravel-ragkit/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/mohaphez/laravel-ragkit/actions/workflows/run-tests.yml)
-[![License](https://img.shields.io/packagist/l/mohaphez/laravel-ragkit.svg?style=flat-square)](https://packagist.org/packages/mohaphez/laravel-ragkit)
+[![License](https://img.shields.io/packagist/l/mohaphez/laravel-ragkit.svg?style=flat-square)](https://github.com/mohaphez/laravel-ragkit/blob/main/LICENSE.md)
 
 RagKit is a Laravel package that provides a clean, reusable implementation of Retrieval-Augmented Generation (RAG) systems with support for multiple drivers.
 
