@@ -85,4 +85,30 @@ return [
 
     // User model to use for relationships
     'user_model' => 'App\\Models\\User',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Document Upload Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configure the document upload event listener behavior and handlers.
+    |
+    */
+
+    'upload' => [
+        // Enable or disable the upload event listener
+        'enable_upload_listener' => env('RAGKIT_ENABLE_UPLOAD_LISTENER', true),
+
+        // The handler class that will process document uploads
+        'upload_handler_class' => \RagKit\Handlers\DefaultUploadHandler::class,
+        
+        // Maximum number of retry attempts for document upload jobs
+        'max_retry_attempts' => env('RAGKIT_UPLOAD_MAX_RETRIES', 3),
+        
+        // Backoff times in seconds between retry attempts
+        'retry_backoff' => [10, 60, 180],
+        
+        // Queue to use for document upload jobs
+        'queue' => env('RAGKIT_UPLOAD_QUEUE', 'default'),
+    ],
 ]; 
