@@ -1,9 +1,9 @@
 # RagKit - Retrieval-Augmented Generation for Laravel
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/ragkit/ragkit.svg?style=flat-square)](https://packagist.org/packages/ragkit/ragkit)
-[![Total Downloads](https://img.shields.io/packagist/dt/ragkit/ragkit.svg?style=flat-square)](https://packagist.org/packages/ragkit/ragkit)
-[![Tests](https://img.shields.io/github/actions/workflow/status/ragkit/ragkit/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/ragkit/ragkit/actions/workflows/run-tests.yml)
-[![License](https://img.shields.io/packagist/l/ragkit/ragkit.svg?style=flat-square)](https://packagist.org/packages/ragkit/ragkit)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/mohaphez/laravel-ragkit.svg?style=flat-square)](https://packagist.org/packages/mohaphez/laravel-ragkit)
+[![Total Downloads](https://img.shields.io/packagist/dt/mohaphez/laravel-ragkit.svg?style=flat-square)](https://packagist.org/packages/mohaphez/laravel-ragkit)
+[![Tests](https://img.shields.io/github/actions/workflow/status/mohaphez/laravel-ragkit/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/mohaphez/laravel-ragkit/actions/workflows/run-tests.yml)
+[![License](https://img.shields.io/packagist/l/mohaphez/laravel-ragkit.svg?style=flat-square)](https://packagist.org/packages/mohaphez/laravel-ragkit)
 
 RagKit is a Laravel package that provides a clean, reusable implementation of Retrieval-Augmented Generation (RAG) systems with support for multiple drivers.
 
@@ -46,7 +46,7 @@ RagKit is a Laravel package that provides a clean, reusable implementation of Re
 You can install the package via composer:
 
 ```bash
-composer require ragkit/ragkit
+composer require mohaphez/laravel-ragkit
 ```
 
 After installing, publish the configuration and migrations:

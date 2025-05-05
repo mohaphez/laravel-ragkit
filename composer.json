@@ -1,5 +1,5 @@
 {
-    "name": "ragkit/ragkit",
+    "name": "mohaphez/laravel-ragkit",
     "description": "A Laravel package for Retrieval-Augmented Generation (RAG) systems with support for multiple drivers",
     "type": "library",
     "license": "MIT",
