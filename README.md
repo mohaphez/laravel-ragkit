@@ -7,29 +7,39 @@
 
 RagKit is a Laravel package that provides a clean, reusable implementation of Retrieval-Augmented Generation (RAG) systems with support for multiple drivers.
 
-## 📚 Documentation
+## 📚 Table of Contents
 
-For detailed documentation, please see [DOCUMENTATION.md](DOCUMENTATION.md).
-
-### Quick Links
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Basic Usage](#usage)
+- [Data Structure](#data-structure)
+- [Usage](#usage)
 - [Console Commands](#console-commands)
+- [API Endpoints](#api-endpoints)
+- [Creating Custom Drivers](#creating-custom-drivers)
+- [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Features
 
-- Support for multiple RAG service providers (currently supports ChatBees)
-- Hierarchical account-collection structure for better organization
-- Simple API for uploading and managing documents
-- Console commands for bulk document import and collection management
-- Easy integration with existing Laravel applications
-- Document retrieval and question answering
-- Chat-based interaction with document knowledge
-- Document outlines and FAQs extraction
+### Core Features
+- **Multi-Provider Support**: Built-in support for multiple RAG service providers (currently ChatBees)
+- **Hierarchical Data Structure**: Organized account-collection structure for better document management
+- **Document Management**: 
+  - Asynchronous document upload and processing
+  - Background job processing for document uploads
+  - Support for multiple file formats (PDF, DOCX, DOC, TXT)
+  - Document status tracking and error handling
+- **RAG Operations**:
+  - Document retrieval and question answering
+  - Chat-based interaction with document knowledge
+  - Document outlines and FAQs extraction
+- **Laravel Integration**:
+  - Seamless integration with existing Laravel applications
+  - Built-in authentication and middleware support
+  - Eloquent model relationships
+  - Event-driven architecture
 
 ## Installation
 
@@ -54,6 +64,7 @@ php artisan migrate
 
 ## Configuration
 
+### Provider Configuration
 Configure your RAG service provider credentials in your `.env` file:
 
 ```
@@ -62,14 +73,43 @@ RAGKIT_CHATBEES_API_KEY=your-api-key
 RAGKIT_CHATBEES_ACCOUNT_ID=your-account-id
 ```
 
+### Storage Settings
+```php
+'storage' => [
+    'disk' => env('RAGKIT_STORAGE_DISK', 'local'),
+    'path' => env('RAGKIT_STORAGE_PATH', 'rag'),
+],
+```
+
+### Upload Settings
+Configure upload processing in `config/ragkit.php`:
+
+```php
+'upload' => [
+    'enable_upload_listener' => true,
+    'upload_handler_class' => \RagKit\Handlers\DefaultUploadHandler::class,
+    'queue' => 'default',
+    'max_retry_attempts' => 3,
+    'retry_backoff' => [10, 60, 180], // seconds between retries
+],
+```
+
+### Route Configuration
+```php
+'routes' => [
+    'prefix' => 'rag',
+    'middleware' => ['web', 'auth'],
+],
+```
+
 ## Data Structure
 
 RagKit uses a hierarchical data structure:
 
-1. **User** - A user can have multiple RAG accounts
-2. **Account** - Each account belongs to a user and represents a connection to a specific RAG provider
-3. **Collection** - Each account can have multiple collections, which group related documents
-4. **Document** - Documents are stored in collections
+1. **User Level**: Multiple RAG accounts per user
+2. **Account Level**: Provider-specific accounts with custom settings
+3. **Collection Level**: Logical grouping of related documents
+4. **Document Level**: Individual documents with metadata, status tracking, and processing state
 
 This structure allows for better organization and separation of concerns.
 
@@ -128,7 +168,7 @@ $collection = RagKit::createCollection(
 ### Uploading Documents
 
 ```php
-// Upload a document to a collection
+// Upload a document to a collection (triggers background processing)
 $document = RagKit::uploadDocument(
     $collection,
     $filePath,
@@ -138,7 +178,32 @@ $document = RagKit::uploadDocument(
         'category' => 'knowledge_base',
     ]
 );
+
+// Check document status
+$status = $document->status; // created, queued, uploading, processing, completed, failed, retry
+$message = $document->status_message;
 ```
+
+### Document Processing Flow
+
+1. Document is uploaded and stored locally
+2. `DocumentUploaded` event is fired
+3. `HandleDocumentUpload` listener processes the event
+4. `DefaultUploadHandler` queues the document for processing
+5. `ProcessRagDocumentUpload` job:
+   - Uploads document to RAG provider
+   - Updates document status
+   - Retrieves outlines and FAQs
+   - Handles retries on failure
+
+### Document Status States
+- `created`: Initial state when document is stored locally
+- `queued`: Document is queued for processing
+- `uploading`: Document is being uploaded to provider
+- `processing`: Document is being processed by provider
+- `completed`: Document processing is complete
+- `failed`: Document processing failed
+- `retry`: Document processing failed and will be retried
 
 ### Asking Questions
 
@@ -204,18 +269,59 @@ The command accepts the following options:
 - `--provider`: (Optional) Filter collections by provider (e.g., 'chatbees')
 - `--user_id`: (Optional) Filter collections by user ID
 
-## Routes
+## API Endpoints
 
-The package provides several routes for managing accounts, collections, documents, and handling chat:
+All routes are prefixed with `/rag` and protected by `web` and `auth` middleware.
 
-- `GET /rag/accounts` - Get all accounts for the current user
-- `GET /rag/collections` - Get collections for a specific account
-- `GET /rag/documents` - Get documents for a specific collection
-- `POST /rag/chat` - Send a chat message to a collection
-- `POST /rag/documents/upload` - Upload a new document to a collection
-- `GET /rag/documents/{uuid}` - View a specific document
-- `DELETE /rag/documents/{uuid}` - Delete a document
-- `GET /rag/documents/{uuid}/outline-faq` - Get document outlines and FAQs
+### Account Management
+- **GET** `/rag/accounts`
+  - Lists all RAG accounts for authenticated user
+  - Response: Array of account objects
+
+### Collection Management
+- **GET** `/rag/collections`
+  - Lists collections for specified account
+  - Query Parameters:
+    - `account_id`: Required
+  - Response: Array of collection objects
+
+### Document Operations
+- **GET** `/rag/documents`
+  - Lists documents in a collection
+  - Query Parameters:
+    - `collection_id`: Required
+  - Response: Paginated document objects
+
+- **POST** `/rag/documents/upload`
+  - Uploads new document (triggers background processing)
+  - Headers:
+    - `Content-Type: multipart/form-data`
+  - Body:
+    - `file`: Document file
+    - `collection_id`: Collection ID
+    - `metadata`: Optional JSON metadata
+  - Response: Document object with initial status
+
+- **GET** `/rag/documents/{uuid}`
+  - Retrieves document details including processing status
+  - Response: Document object with status and metadata
+
+- **DELETE** `/rag/documents/{uuid}`
+  - Deletes a document
+  - Response: Success status
+
+- **GET** `/rag/documents/{uuid}/outline-faq`
+  - Gets document outline and FAQs
+  - Response: Object containing outline and FAQs
+
+### Chat Interaction
+- **POST** `/rag/chat`
+  - Sends chat message
+  - Body:
+    - `collection_id`: Collection ID
+    - `message`: User message
+    - `history`: Optional chat history
+  - Response: Chat response with references
 
 ## Creating Custom Drivers
 
@@ -241,6 +347,63 @@ Run the package tests with PHPUnit:
 ```bash
 composer test
 ```
+
+### Test Coverage
+- **Unit Tests**:
+  - Account management
+  - Collection operations
+  - Document handling and background processing
+  - Chat functionality
+  
+- **Feature Tests**:
+  - API endpoints
+  - Console commands
+  - Service integrations
+  - Authentication flows
+
+## Contributing
+
+### Development Setup
+1. Fork the repository
+2. Create feature branch: `feature/your-feature-name`
+3. Clone repository
+4. Install dependencies:
+   ```bash
+   composer install
+   ```
+5. Copy `.env.example` to `.env`
+6. Configure RAG provider credentials
+7. Run migrations:
+   ```bash
+   php artisan migrate
+   ```
+
+### Coding Standards
+- PSR-12 coding standard
+- Laravel best practices
+- PHPDoc blocks for methods
+
+### Pull Request Process
+1. Ensure tests pass: `composer test`
+2. Update documentation if needed
+3. Follow commit message convention:
+   - feat: New feature
+   - fix: Bug fix
+   - docs: Documentation
+   - test: Test updates
+   - refactor: Code refactoring
+
+### Branch Strategy
+- `main`: Production-ready code
+- `develop`: Development branch
+- Feature branches: `feature/*`
+- Bugfix branches: `fix/*`
+
+### Code Review
+- All PRs require review
+- Must pass CI/CD checks
+- Must maintain test coverage
+- Must follow coding standards
 
 ## License
 
