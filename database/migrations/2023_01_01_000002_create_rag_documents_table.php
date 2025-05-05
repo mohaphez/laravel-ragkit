@@ -21,9 +21,12 @@ return new class extends Migration
             $table->unsignedBigInteger('file_size')->nullable();
             $table->string('mime_type')->nullable();
             $table->string('status')->default('pending');
+            $table->string('status_message')->nullable();
             $table->json('metadata')->nullable();
+            $table->json('external_metadata')->nullable();
             $table->json('outlines')->nullable();
             $table->json('faqs')->nullable();
+            $table->timestamp('processed_at')->nullable();
             $table->timestamps();
 
             $table->index(['rag_collection_id', 'status']);
