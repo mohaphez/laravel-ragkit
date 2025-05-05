@@ -24,9 +24,12 @@ class RagDocument extends Model
         'file_size',
         'mime_type',
         'status',
+        'status_message',
         'metadata',
+        'external_metadata',
         'outlines',
         'faqs',
+        'processed_at',
     ];
 
     /**
@@ -36,9 +39,11 @@ class RagDocument extends Model
      */
     protected $casts = [
         'metadata' => 'array',
+        'external_metadata' => 'array',
         'outlines' => 'array',
         'faqs' => 'array',
         'file_size' => 'integer',
+        'processed_at' => 'datetime',
     ];
 
     /**

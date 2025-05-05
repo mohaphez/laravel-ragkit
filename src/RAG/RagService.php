@@ -6,6 +6,7 @@ use RagKit\Contracts\RagServiceInterface;
 use RagKit\Models\RagAccount;
 use RagKit\Models\RagCollection;
 use RagKit\Models\RagDocument;
+use RagKit\Events\DocumentUploaded;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -146,51 +147,24 @@ class RagService implements RagServiceInterface
         $fileSize = Storage::size($storagePath);
         $mimeType = Storage::mimeType($storagePath);
 
+        // Create document record in initial state
         $document = RagDocument::create([
             'rag_collection_id' => $collection->id,
             'original_filename' => $fileName,
             'file_path' => $storagePath,
             'file_size' => $fileSize,
             'mime_type' => $mimeType,
-            'status' => 'processing',
+            'status' => 'created',
+            'status_message' => 'Document created and stored locally',
             'metadata' => $metadata,
+            'external_metadata' => [],
+            'uuid' => Str::uuid(),
         ]);
 
-        $result = $adapter->uploadDocument(
-            $collection->collection_id,
-            Storage::path($storagePath),
-            $fileName
-        );
+        // Fire the DocumentUploaded event to trigger the async processing
+        event(new DocumentUploaded($document));
 
-        if ($result) {
-            $document->update([
-                'document_id' => $result['doc_name'] ?? $fileName,
-                'status' => 'completed',
-            ]);
-
-            try {
-                $outlineFaq = $adapter->getDocumentOutlineFaq(
-                    $collection->collection_id,
-                    $document->document_id
-                );
-
-                $document->update([
-                    'outlines' => $outlineFaq['outlines'] ?? [],
-                    'faqs' => $outlineFaq['faqs'] ?? [],
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Failed to get document outline/FAQs', [
-                    'error' => $e->getMessage(),
-                    'document_id' => $document->id,
-                ]);
-            }
-
-            return $document;
-        }
-
-        $document->update(['status' => 'failed']);
-        
-        return null;
+        return $document;
     }
 
     /**

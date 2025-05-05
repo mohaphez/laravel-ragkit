@@ -114,7 +114,16 @@ class RagServiceTest extends TestCase
             ->once()
             ->with('test_collection_123', Mockery::type('string'), 'document.pdf')
             ->andReturn(['doc_name' => 'test_document_123']);
+            
+        $this->mockAdapter->shouldReceive('getDocumentOutlineFaq')
+            ->once()
+            ->with('test_collection_123', 'test_document_123')
+            ->andReturn([
+                'outlines' => [['title' => 'Section 1', 'level' => 1]],
+                'faqs' => [['question' => 'Test Q?', 'answer' => 'Test A']]
+            ]);
         
+        // Upload document and get initial state
         $document = $this->service->uploadDocument(
             $collection, 
             $filePath, 
@@ -122,7 +131,21 @@ class RagServiceTest extends TestCase
         );
         
         $this->assertNotNull($document);
+        $this->assertEquals('queued', $document->status);
+        $this->assertEquals('Document queued for processing', $document->status_message);
+        
+        // Process the upload job synchronously
+        $job = new \RagKit\Jobs\ProcessRagDocumentUpload($document);
+        $job->handle($this->service);
+        
+        // Refresh document from database
+        $document->refresh();
+        
+        // Verify final state after processing
+        $this->assertEquals('completed', $document->status);
         $this->assertEquals('test_document_123', $document->document_id);
+        $this->assertNotEmpty($document->outlines);
+        $this->assertNotEmpty($document->faqs);
     }
     
     public function testCanAskQuestion()
@@ -186,11 +209,19 @@ class RagServiceTest extends TestCase
             ->with('test_collection_123', Mockery::type('string'), 'document.pdf')
             ->andReturn(['doc_name' => 'test_document_123']);
         
+        // Upload document and get initial state
         $document = $this->service->uploadDocument(
             $collection, 
             $filePath, 
             $fileName
         );
+        
+        // Process the upload job synchronously
+        $job = new \RagKit\Jobs\ProcessRagDocumentUpload($document);
+        $job->handle($this->service);
+        
+        // Refresh document from database
+        $document->refresh();
         
         $this->mockAdapter->shouldReceive('getDocumentOutlineFaq')
             ->once()
